@@ -78,7 +78,19 @@ void TEST4() {
     CATCH(ExceptionNum, excep, std::cout << excep->num << std::endl;)
 }
 
+void TEST5() {
+    TRY(
+        ObjNum c;
+        ObjNum d;
+        std::cout << "TRY2" << std::endl;
+        THROW(new ExceptionStr("STR EXCEPTION"));
+        )
+    CATCH(ExceptionNum, excep1, std::cout << excep1->num << std::endl;)
+    CATCH(ExceptionStr, excep, std::cout << excep->text << std::endl;)
+    END_CATCH;
+}
+
 int main() {
-    TEST4();
+    TEST3();
     return 0;
 }

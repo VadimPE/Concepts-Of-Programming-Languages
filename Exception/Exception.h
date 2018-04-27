@@ -40,17 +40,17 @@ public:
     if (jmp_value == 0) {                                                               \
         jmps.push_back(jmpb);                                                           \
         CODE                                                                            \
-    }                                                                                   \
+    }\
+    delete[] jmps.back();                                                               \
+    jmps.pop_back();\
 
 #define CATCH(TYPE, ERROR, CODE)                                                        \
-    delete[] jmps.back();                                                               \
-    jmps.pop_back();                                                                    \
     TYPE* ERROR = dynamic_cast<TYPE*>(exception);                                       \
     if (jmp_value != 0 && ERROR != nullptr) {                                           \
         CODE                                                                            \
+        delete exception;\
     }                                                                                   \
     if (ERROR == nullptr) {                                                             \
-        THROW(exception);                                                               \
     }                                                                                   \
 
 #define THROW(EXCEPTION)                                                                \
@@ -62,3 +62,8 @@ public:
     }                                                                                   \
     exception = EXCEPTION;                                                              \
     longjmp(*(jmps.back()), 1);                                                         \
+
+#define END_CATCH \
+if (exception != nullptr) { \
+    THROW(exception); \
+} \
