@@ -11,10 +11,10 @@ size_t GetHash(std::string class_name) {
     return hash_foo(class_name);
 };
 
-template <typename to_class_ptr, typename from_class_ptr>
-to_class_ptr CastForced(from_class_ptr obj_ptr) {
-    from_class_ptr* new_obj_ptr = reinterpret_cast<from_class_ptr>(obj_ptr);
-    new_obj_ptr->name = obj_ptr->name;
+template <typename from_class_ptr, typename to_class_ptr>
+to_class_ptr Cast(from_class_ptr obj_ptr) {
+    to_class_ptr new_obj_ptr = reinterpret_cast<from_class_ptr>(obj_ptr);
+    new_obj_ptr->name_ = obj_ptr->name_;
     return new_obj_ptr;
 };
 
@@ -22,7 +22,9 @@ std::unordered_set<std::string> Split(std::string str, char chr) {
     std::unordered_set<std::string> ans;
     std::string new_class_name = "";
     for (auto i = 0; i < str.length(); ++i) {
-        if (str[i] == chr) {
+        if (str[i] == ' ') {
+            new_class_name = "";
+        } else if (str[i] == chr) {
             ans.insert(new_class_name);
             new_class_name = "";
         } else {
@@ -40,6 +42,18 @@ struct type_info {
     size_t hash_;
 };
 
+bool IsParent(std::string from_class, std::string to_class) {
+    if (from_class == to_class) {
+        return true;
+    }
+    for (auto i = classes[from_class].begin(); i != classes[from_class].end(); ++i) {
+        if (IsParent(*i, to_class)) {
+            return true;
+        }
+    }
+    return false;
+};
+
 #define TYPEID(obj_ptr) obj_ptr->type_info
 
 #define BASE_CLASS(class_name) class class_name { \
@@ -52,10 +66,10 @@ struct type_info {
 type_info GetInfo() { \
     return class_name::type_info_; \
 } \
+    std::string name_; \
   private: \
     static std::unordered_set<std::string> parents_; \
     static type_info type_info_; \
-    std::string name_; \
   public: \
 
 #define DERIVED_CLASS(class_name, ...) class class_name: __VA_ARGS__ { \
@@ -69,14 +83,15 @@ type_info GetInfo() { \
     type_info GetInfo() { \
         return class_name::type_info_; \
     } \
+    std::string name_; \
   private: \
     static std::unordered_set<std::string> parents_; \
     static type_info type_info_; \
-    std::string name_; \
   public: \
 
 #define END_CLASS(class_name) };\
 std::unordered_set<std::string> class_name::parents_; \
 type_info class_name::type_info_ = type_info(#class_name); \
 
-#define DYNAMIC_CAST()
+#define DYNAMIC_CAST(from_class_ptr, to_class_ptr, obj_ptr) (IsParent(#from_class_ptr, #to_class_ptr)) ? (Cast<from_class_ptr*, to_class_ptr*>(obj_ptr)) : nullptr
+

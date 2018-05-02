@@ -18,8 +18,10 @@ DERIVED_CLASS(B, public A, public C)
 END_CLASS(B)
 
 int main() {
+    A::DECLARE();
     B::DECLARE();
-    B a;
-    std::cout << a.b;
+    B b;
+    A* a = DYNAMIC_CAST(B, A, (&b));
+    a->foo();
     return 0;
 }
