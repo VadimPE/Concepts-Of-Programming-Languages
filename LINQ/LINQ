@@ -1,0 +1,43 @@
+class Range:
+
+    def __init__(self, generator):
+        self.generator_ = generator
+
+    def Select(self, foo):
+        return Range(map(foo, self.generator_))
+
+    def Flatten(self):
+        return Range(self.flatten_generator())
+
+    def flatten_generator(self):
+        for array in self.generator_:
+            for data in array:
+                yield data
+
+    def Where(self, pred):
+        return Range(filter(pred, self.generator_))
+
+    def Take(self, k):
+        return Range(self.take_generator(k))
+
+    def take_generator(self, k):
+        ind = 0
+        for i in self.generator_:
+            if ind == k:
+                break
+            ind += 1
+            yield i
+
+    def OrderBy(self, foo):
+        return Range(sorted(self.generator_, key=foo))
+
+    def ToList(self):
+        return list(self.generator_)
+
+def fibonacci_generator():
+    a, b = 1, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+print((Range(fibonacci_generator()).Where(lambda x: x % 3 == 0)).Take(5).ToList())
